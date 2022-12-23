@@ -8,3 +8,7 @@ function apply_rotation(x, y, angle) {
 function add_pos(pos1, pos2) {
 	return [pos1[0] + pos2[0], pos1[1] + pos2[1]];
 }
+
+function getRandomInt(max) {
+	return Math.floor(Math.random() * max);
+}
