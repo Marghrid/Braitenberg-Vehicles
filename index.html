@@ -12,16 +12,16 @@
 
 <body>
   <div id=title_div>
-    <h1>Braitenberg</h1>
+    <h1>Braitenberg vehicles</h1>
   </div>
   <div id=main_div>
     <div id=canvas_div>
       <canvas id="canvas">
         Your browser does not support the HTML5 canvas tag.</canvas>
       <div id=canvas_buttons_div>
-        <input id="stepButton" type="button" onclick="step_button(env, planner, c1, info)" value="Step"></input>
-        <input id="playButton" type="button" onclick="play_button(env, planner, c1, info)" value="Play"></input>
-        <input id="refreshButton" type="button" onclick="refresh_button()" value="Generate new instance"></input>
+        <!-- <input id="stepButton" type="button" onclick="step_button(env, planner, c1, info)" value="Step"></input> -->
+        <!-- <input id="playButton" type="button" onclick="play_button(env, planner, c1, info)" value="Play"></input> -->
+        <input id="refreshButton" type="button" onclick="refresh_button()" value="New"></input>
       </div>
     </div>
     <div id=info_div> </div>
@@ -31,18 +31,18 @@
     let info = document.getElementById("info_div");
 
     let canvas = document.getElementById("canvas");
-    let resolution_scale = 1;
 
-    let env_size = Math.floor(Math.min(0.95 * window.innerWidth, 0.85 * window.innerHeight));
-    canvas.height = env_size * resolution_scale;
-    canvas.width = env_size * resolution_scale;
-    info.style.flexBasis = env_size;
+    let env_width = Math.floor(Math.min(0.95 * window.innerWidth));
+    let env_height = Math.floor(Math.min(0.85 * window.innerHeight));
+    canvas.height = env_height;
+    canvas.width = env_width;
+    info.style.flexBasis = env_width;
 
-    let env = new Environment(env_size);
+    let env = new Environment(env_width, env_height);
 
     let p = document.createElement("p");
     info.appendChild(p);
-    p.innerHTML = "Environment size: " + env_size.toString() + "x" + env_size.toString() + "px.";
+    p.innerHTML = "Environment size: " + env_width.toString() + "x" + env_height.toString() + "px.";
 
     p = document.createElement("p");
     info.appendChild(p);

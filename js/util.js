@@ -12,3 +12,13 @@ function add_pos(pos1, pos2) {
 function getRandomInt(max) {
 	return Math.floor(Math.random() * max);
 }
+
+function euclidean_distance(p, q) {
+	let a = p[0] - q[0];
+	let b = p[1] - q[1];
+	return Math.sqrt(a * a + b * b);
+}
+
+function keep_inside(pos, width, height) {
+	return [(width + pos[0]) % width, (height + pos[1]) % height]
+}
