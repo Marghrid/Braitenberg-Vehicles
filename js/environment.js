@@ -29,7 +29,7 @@ class Environment {
 		this.sources = [];
 		this.agents = [];
 		this.friction = 0; // friction.
-		this.agents_base_speed = .1;
+		this.agents_base_speed = 0;
 		this.agents_width = (this.width + this.height) / 128
 		this.agents_height = (this.width + this.height) / 64
 
