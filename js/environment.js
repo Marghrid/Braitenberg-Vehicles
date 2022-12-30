@@ -1,22 +1,14 @@
 class Environment {
 
 	init_agents() {
-		for (let i = 0; i < 7; ++i) {
-			let agent_pos = [getRandomInt(this.width + 1), getRandomInt(this.height + 1)];
-			let agent_rot = Math.random() * 2 * Math.PI;
-			let agent_color = this.agents_colors[i % this.agents_colors.length]
-			this.agents.push([agent_pos, agent_rot, agent_color]);
+		for (let i = 0; i < (this.width * this.height / 2 ** 17); ++i) {
+			this.add_agent()
 		}
 	}
 
 	init_sources() {
 		for (let i = 0; i < (this.width * this.height / 2 ** 17); ++i) {
-			let min_radius = this.width / 9;
-			let max_radius = this.width / 8;
-			let source_radius = getRandomInt(max_radius - min_radius) + min_radius;
-			let source_pos = [getRandomInt(this.width + 1 - source_radius * 2) + source_radius,
-			getRandomInt(this.height + 1 - source_radius * 2) + source_radius];
-			this.sources.push([source_pos, source_radius]);
+			this.add_source();
 		}
 	}
 
@@ -25,16 +17,45 @@ class Environment {
 		this.height = height;
 		this.background_color = "rgba(5,20,30,1)"; // "#01324d";
 		this.agents_colors = ["#fcc3ae", "#fce9ae", "#aefcb2", "#9df7fa", "#b1bcfc", "#ddb6fc", "#fcb6d3"];
+		// this.agents_colors = ["#ff4694","#ff6092","#ff7a8f","#ff948d","#ffae8b","#ffc889","#ffe186"];
+
 		this.sources_color = "#40b6ff"; // #00c479
 		this.sources = [];
 		this.agents = [];
+		this.agents_pasts = [];
 		this.friction = 0; // friction.
 		this.agents_base_speed = 0;
-		this.agents_width = (this.width + this.height) / 128
-		this.agents_height = (this.width + this.height) / 64
+		this.agents_width = (this.width + this.height) / 128;
+		this.agents_height = (this.width + this.height) / 64;
+		this.agents_history_length = 500;
 
 		this.init_agents();
 		this.init_sources();
+	}
+
+	add_agent() {
+		let agent_pos = [get_random_int(this.width + 1), get_random_int(this.height + 1)];
+		let agent_rot = Math.random() * 2 * Math.PI;
+		this.agents.push([agent_pos, agent_rot]);
+		this.agents_pasts.push([])
+	}
+
+	add_source() {
+		let min_radius = this.width / 9;
+		let max_radius = this.width / 8;
+		let source_radius = get_random_int(max_radius - min_radius) + min_radius;
+		let source_pos = [get_random_int(this.width + 1 - source_radius * 2) + source_radius,
+		get_random_int(this.height + 1 - source_radius * 2) + source_radius];
+		this.sources.push([source_pos, source_radius]);
+	}
+
+	remove_agent() {
+		this.agents.pop();
+		this.agents_pasts.pop();
+	}
+
+	remove_source() {
+		this.sources.pop();
 	}
 
 	draw() {
@@ -54,7 +75,20 @@ class Environment {
 		this.last_time = new_time;
 
 		this.sources.forEach(source => this.draw_source(ctx, source[0], source[1]));
-		this.agents.forEach(agent => this.draw_agent(ctx, agent[0], agent[1], agent[2]));
+		for (let i = 0; i < this.agents_pasts.length; ++i) {
+			let agent = this.agents[i];
+			this.draw_agent(ctx, agent[0], agent[1], this.agents_colors[i % this.agents_colors.length])
+		}
+		for (let i = 0; i < this.agents_pasts.length; ++i) {
+			for (let j = 0; j < this.agents_pasts[i].length; ++j) {
+				let agent = this.agents_pasts[i][j];
+				// this.draw_agent(ctx, agent[0], agent[1], this.agents_transparent_colors[i]);
+				let alpha_num = Math.floor(15 * (j / this.agents_pasts[i].length) ** 2);
+				console.assert(0 <= alpha_num < 100);
+				let alpha = String(alpha_num).padStart(2, '0')
+				this.draw_agent(ctx, agent[0], agent[1], this.agents_colors[i % this.agents_colors.length].concat(alpha));
+			}
+		}
 	}
 
 	draw_agent(ctx, agent_pos, agent_rot, agent_color) {
@@ -109,6 +143,13 @@ class Environment {
 
 	update_agents(elapsed) {
 		for (let i = 0; i < this.agents.length; ++i) {
+			// Before uptating agent, update agent's history:
+			this.agents_pasts[i].push([...this.agents[i]]);
+			if (this.agents_pasts[i].length > this.agents_history_length)
+				this.agents_pasts[i].shift();
+
+
+			// Update agent according to its movement:
 			let agent_pos = this.agents[i][0];
 			let agent_rot = this.agents[i][1];
 
@@ -117,29 +158,29 @@ class Environment {
 
 			let left_distance = 0;
 			for (let j = 0; j < this.sources.length; ++j) {
-				left_distance += 1 / (euclidean_distance(left_side, this.sources[j][0]));
+				left_distance += 1 / euclidean_distance(left_side, this.sources[j][0]);
 			}
 
 			let right_distance = 0;
 			for (let j = 0; j < this.sources.length; ++j) {
-				right_distance += 1 / (euclidean_distance(right_side, this.sources[j][0]));
+				right_distance += 1 / euclidean_distance(right_side, this.sources[j][0]);
 			}
 
 			console.assert(left_distance > 0);
 			console.assert(right_distance > 0);
 
-			// The force dictates the proportion of movement on each wheel.
-			let factor = 65; // How much of the speed is dictated by the distance to light
+			// The force dictates the proportion of movement on each motor.
+			let factor = 75; // How much of the speed is dictated by the distance to light
 			let delta_left = factor * left_distance;
 			let delta_right = factor * right_distance;
 
-			let theta = 1 * elapsed * (right_distance - left_distance) / this.agents_width;
+			let theta = elapsed * (delta_right - delta_left) / this.agents_width;
 
 			if (!isNaN(elapsed)) {
 				let delta_x = elapsed * (this.agents_base_speed + (delta_left + delta_right) / 2);
-				this.agents[i][0] = add_pos(agent_pos, apply_rotation(delta_x, 0, this.agents[i][1]));
-				this.agents[i][0] = keep_inside(this.agents[i][0], this.width, this.height)
 				this.agents[i][1] += theta; // Rotate agent
+				this.agents[i][0] = add_pos(agent_pos, apply_rotation(delta_x, 0, this.agents[i][1]));
+				this.agents[i][0] = keep_inside(this.agents[i][0], this.width, this.height);
 			}
 		}
 		this.agents_base_speed *= 1 - this.friction;
@@ -150,7 +191,7 @@ class Environment {
 			let source_pos = this.sources[i][0];
 			let source_radius = this.sources[i][1];
 			let source_rot = (source_radius * 10) % (2 * Math.PI);
-			let source_speed = 25 / source_radius
+			let source_speed = 15 / source_radius
 
 			if (!isNaN(elapsed)) {
 				let delta_x = elapsed * source_speed;
