@@ -1,8 +1,8 @@
 class Environment {
 
-	init_agents() {
+	init_vehicles() {
 		for (let i = 0; i < (this.width * this.height / 2 ** 17); ++i) {
-			this.add_agent()
+			this.add_vehicle()
 		}
 	}
 
@@ -16,28 +16,28 @@ class Environment {
 		this.width = width;
 		this.height = height;
 		this.background_color = "rgba(5,20,30,1)"; // "#01324d";
-		this.agents_colors = ["#fcc3ae", "#fce9ae", "#aefcb2", "#9df7fa", "#b1bcfc", "#ddb6fc", "#fcb6d3"];
-		// this.agents_colors = ["#ff4694","#ff6092","#ff7a8f","#ff948d","#ffae8b","#ffc889","#ffe186"];
+		this.vehicles_colors = ["#fcc3ae", "#fce9ae", "#aefcb2", "#9df7fa", "#b1bcfc", "#ddb6fc", "#fcb6d3"];
+		// this.vehicles_colors = ["#ff4694","#ff6092","#ff7a8f","#ff948d","#ffae8b","#ffc889","#ffe186"];
 
 		this.sources_color = "#40b6ff"; // #00c479
 		this.sources = [];
-		this.agents = [];
-		this.agents_pasts = [];
+		this.vehicles = [];
+		this.vehicles_pasts = [];
 		this.friction = 0; // friction.
-		this.agents_base_speed = 0;
-		this.agents_width = (this.width + this.height) / 128;
-		this.agents_height = (this.width + this.height) / 64;
-		this.agents_history_length = 500;
+		this.vehicles_base_speed = 0;
+		this.vehicles_width = (this.width + this.height) / 128;
+		this.vehicles_height = (this.width + this.height) / 64;
+		this.vehicles_history_length = 500;
 
-		this.init_agents();
+		this.init_vehicles();
 		this.init_sources();
 	}
 
-	add_agent() {
-		let agent_pos = [get_random_int(this.width + 1), get_random_int(this.height + 1)];
-		let agent_rot = Math.random() * 2 * Math.PI;
-		this.agents.push([agent_pos, agent_rot]);
-		this.agents_pasts.push([])
+	add_vehicle() {
+		let vehicle_pos = [get_random_int(this.width + 1), get_random_int(this.height + 1)];
+		let vehicle_rot = Math.random() * 2 * Math.PI;
+		this.vehicles.push([vehicle_pos, vehicle_rot]);
+		this.vehicles_pasts.push([])
 	}
 
 	add_source() {
@@ -49,9 +49,9 @@ class Environment {
 		this.sources.push([source_pos, source_radius]);
 	}
 
-	remove_agent() {
-		this.agents.pop();
-		this.agents_pasts.pop();
+	remove_vehicle() {
+		this.vehicles.pop();
+		this.vehicles_pasts.pop();
 	}
 
 	remove_source() {
@@ -75,43 +75,43 @@ class Environment {
 		this.last_time = new_time;
 
 		this.sources.forEach(source => this.draw_source(ctx, source[0], source[1]));
-		for (let i = 0; i < this.agents_pasts.length; ++i) {
-			let agent = this.agents[i];
-			this.draw_agent(ctx, agent[0], agent[1], this.agents_colors[i % this.agents_colors.length])
+		for (let i = 0; i < this.vehicles_pasts.length; ++i) {
+			let vehicle = this.vehicles[i];
+			this.draw_vehicle(ctx, vehicle[0], vehicle[1], this.vehicles_colors[i % this.vehicles_colors.length])
 		}
-		for (let i = 0; i < this.agents_pasts.length; ++i) {
-			for (let j = 0; j < this.agents_pasts[i].length; ++j) {
-				let agent = this.agents_pasts[i][j];
-				// this.draw_agent(ctx, agent[0], agent[1], this.agents_transparent_colors[i]);
-				let alpha_num = Math.floor(15 * (j / this.agents_pasts[i].length) ** 2);
+		for (let i = 0; i < this.vehicles_pasts.length; ++i) {
+			for (let j = 0; j < this.vehicles_pasts[i].length; ++j) {
+				let vehicle = this.vehicles_pasts[i][j];
+				// this.draw_vehicle(ctx, vehicle[0], vehicle[1], this.vehicles_transparent_colors[i]);
+				let alpha_num = Math.floor(15 * (j / this.vehicles_pasts[i].length) ** 2);
 				console.assert(0 <= alpha_num < 100);
 				let alpha = String(alpha_num).padStart(2, '0')
-				this.draw_agent(ctx, agent[0], agent[1], this.agents_colors[i % this.agents_colors.length].concat(alpha));
+				this.draw_vehicle(ctx, vehicle[0], vehicle[1], this.vehicles_colors[i % this.vehicles_colors.length].concat(alpha));
 			}
 		}
 	}
 
-	draw_agent(ctx, agent_pos, agent_rot, agent_color) {
+	draw_vehicle(ctx, vehicle_pos, vehicle_rot, vehicle_color) {
 		// Compute corners' positions.
-		let left_bound = -this.agents_width / 2;
-		let right_bound = this.agents_width / 2;
-		let top_bound = -this.agents_height / 2;
-		let bottom_bound = this.agents_height / 2;
+		let left_bound = -this.vehicles_width / 2;
+		let right_bound = this.vehicles_width / 2;
+		let top_bound = -this.vehicles_height / 2;
+		let bottom_bound = this.vehicles_height / 2;
 
-		let top_left_corner = add_pos(agent_pos, apply_rotation(left_bound, top_bound, agent_rot));
-		let top_right_corner = add_pos(agent_pos, apply_rotation(right_bound, top_bound, agent_rot));
-		let bottom_left_corner = add_pos(agent_pos, apply_rotation(left_bound, bottom_bound, agent_rot));
-		let bottom_right_corner = add_pos(agent_pos, apply_rotation(right_bound, bottom_bound, agent_rot));
+		let top_left_corner = add_pos(vehicle_pos, apply_rotation(left_bound, top_bound, vehicle_rot));
+		let top_right_corner = add_pos(vehicle_pos, apply_rotation(right_bound, top_bound, vehicle_rot));
+		let bottom_left_corner = add_pos(vehicle_pos, apply_rotation(left_bound, bottom_bound, vehicle_rot));
+		let bottom_right_corner = add_pos(vehicle_pos, apply_rotation(right_bound, bottom_bound, vehicle_rot));
 
 		// Draw:
-		ctx.moveTo(agent_pos[0], agent_pos[1]);
+		ctx.moveTo(vehicle_pos[0], vehicle_pos[1]);
 		ctx.beginPath();
 		ctx.lineTo(bottom_right_corner[0], bottom_right_corner[1]);
 		ctx.lineTo(bottom_left_corner[0], bottom_left_corner[1]);
 		ctx.lineTo(top_right_corner[0], top_right_corner[1]);
 		ctx.lineTo(top_left_corner[0], top_left_corner[1]);
 		ctx.closePath();
-		ctx.fillStyle = agent_color;
+		ctx.fillStyle = vehicle_color;
 		ctx.fill();
 		// ctx.fillStyle = this.background_color;
 	}
@@ -137,24 +137,24 @@ class Environment {
 	}
 
 	update(elapsed) {
-		this.update_agents(elapsed);
+		this.update_vehicles(elapsed);
 		this.update_sources(elapsed);
 	}
 
-	update_agents(elapsed) {
-		for (let i = 0; i < this.agents.length; ++i) {
-			// Before uptating agent, update agent's history:
-			this.agents_pasts[i].push([...this.agents[i]]);
-			if (this.agents_pasts[i].length > this.agents_history_length)
-				this.agents_pasts[i].shift();
+	update_vehicles(elapsed) {
+		for (let i = 0; i < this.vehicles.length; ++i) {
+			// Before uptating vehicle, update vehicle's history:
+			this.vehicles_pasts[i].push([...this.vehicles[i]]);
+			if (this.vehicles_pasts[i].length > this.vehicles_history_length)
+				this.vehicles_pasts[i].shift();
 
 
-			// Update agent according to its movement:
-			let agent_pos = this.agents[i][0];
-			let agent_rot = this.agents[i][1];
+			// Update vehicle according to its movement:
+			let vehicle_pos = this.vehicles[i][0];
+			let vehicle_rot = this.vehicles[i][1];
 
-			let left_side = add_pos(agent_pos, apply_rotation(-this.agents_width / 2, 0, agent_rot));
-			let right_side = add_pos(agent_pos, apply_rotation(this.agents_width / 2, 0, agent_rot));
+			let left_side = add_pos(vehicle_pos, apply_rotation(-this.vehicles_width / 2, 0, vehicle_rot));
+			let right_side = add_pos(vehicle_pos, apply_rotation(this.vehicles_width / 2, 0, vehicle_rot));
 
 			let left_distance = 0;
 			for (let j = 0; j < this.sources.length; ++j) {
@@ -174,16 +174,16 @@ class Environment {
 			let delta_left = factor * left_distance;
 			let delta_right = factor * right_distance;
 
-			let theta = elapsed * (delta_right - delta_left) / this.agents_width;
+			let theta = elapsed * (delta_right - delta_left) / this.vehicles_width;
 
 			if (!isNaN(elapsed)) {
-				let delta_x = elapsed * (this.agents_base_speed + (delta_left + delta_right) / 2);
-				this.agents[i][1] += theta; // Rotate agent
-				this.agents[i][0] = add_pos(agent_pos, apply_rotation(delta_x, 0, this.agents[i][1]));
-				this.agents[i][0] = keep_inside(this.agents[i][0], this.width, this.height);
+				let delta_x = elapsed * (this.vehicles_base_speed + (delta_left + delta_right) / 2);
+				this.vehicles[i][1] += theta; // Rotate vehicle
+				this.vehicles[i][0] = add_pos(vehicle_pos, apply_rotation(delta_x, 0, this.vehicles[i][1]));
+				this.vehicles[i][0] = keep_inside(this.vehicles[i][0], this.width, this.height);
 			}
 		}
-		this.agents_base_speed *= 1 - this.friction;
+		this.vehicles_base_speed *= 1 - this.friction;
 	}
 
 	update_sources(elapsed) {

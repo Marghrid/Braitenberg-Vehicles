@@ -12,23 +12,25 @@
 
 <body>
   <div id=title_div>
-    <h1>Braitenberg vehicles</h1>
+    <h1>Braitenberg vehicles (#2B)</h1>
   </div>
   <div id=main_div>
     <div id=canvas_div>
       <canvas id="canvas">
         Your browser does not support the HTML5 canvas tag.</canvas>
       <div id=canvas_buttons_div>
-        <!-- <input id="stepButton" type="button" onclick="step_button(env, planner, c1, info)" value="Step"></input> -->
-        <!-- <input id="playButton" type="button" onclick="play_button(env, planner, c1, info)" value="Play"></input> -->
-        <input id="refreshButton" type="button" onclick="refresh_button()" value="New"></input>
+        <input id="refreshButton" type="button" onclick="refresh_button()" value="New environment"></input>
+        <input id="addVehicle" type="button" onclick="add_vehicle_button(env)" value="Add vehicle"></input>
+        <input id="removeVehicle" type="button" onclick="remove_vehicle_button(env)" value="Remove vehicle"></input>
+        <input id="addSource" type="button" onclick="add_source_button(env)" value="Add light source"></input>
+        <input id="removeSource" type="button" onclick="remove_source_button(env)" value="Remove light source"></input>
       </div>
     </div>
-    <div id=info_div> </div>
+    <!-- <div id=info_div> </div> -->
   </div>
   <script>
 
-    let info = document.getElementById("info_div");
+    let buttons_div = document.getElementById("canvas_buttons_div");
 
     let canvas = document.getElementById("canvas");
 
@@ -36,17 +38,17 @@
     let env_height = Math.floor(Math.min(0.85 * window.innerHeight));
     canvas.height = env_height;
     canvas.width = env_width;
-    info.style.flexBasis = env_width;
+    buttons_div.style.flexBasis = env_width;
 
     let env = new Environment(env_width, env_height);
 
-    let p = document.createElement("p");
-    info.appendChild(p);
-    p.innerHTML = "Environment size: " + env_width.toString() + "x" + env_height.toString() + "px.";
+    // let p = document.createElement("p");
+    // info.appendChild(p);
+    // p.innerHTML = "Environment size: " + env_width.toString() + "x" + env_height.toString() + "px.";
 
-    p = document.createElement("p");
-    info.appendChild(p);
-    p.innerHTML = "Hello!";
+    // p = document.createElement("p");
+    // info.appendChild(p);
+    // p.innerHTML = "Hello!";
 
     // env.draw(canvas);
 
